@@ -87,7 +87,7 @@ The system establishes a normal operating baseline and compares incoming CAN fra
 | Push Button | Digital event input |
 | CAN Bus Interface | CAN communication |
 | USB Cable | Arduino-to-PC serial communication |
-
+![Hardware Setup](images/hardware_setup.jpg)
 ---
 
 ## Software & Technologies
@@ -130,7 +130,7 @@ The system uses CAN ID `0x101` with an 8-byte data payload.
 | Bytes 1–2 | ADC Value | 16-bit ADS1115 reading |
 | Bytes 3–4 | Packet Counter | 16-bit sequential frame counter |
 | Bytes 5–7 | Event Time | 24-bit event timestamp in milliseconds |
-
+![CAN Frame Output](images/can_frame_output.png)
 ### Payload Structure
 
 ```text
@@ -173,7 +173,7 @@ The logger records:
 - Packet counter
 
 The collected data is stored in CSV format and forms the basis for subsequent traffic analysis and anomaly detection.
-
+![CAN Logger](images/can_logging.png)
 ---
 
 ## Normal CAN Baseline
@@ -204,7 +204,7 @@ CAN Sessions         : 1
 ## ADS1115 Sensor Baseline
 
 The ADS1115 readings were analyzed to establish a normal sensor operating range.
-
+![Arduino and ADS1115](images/arduino_ads1115.jpg)
 ### Baseline Statistics
 
 | Parameter | Value |
@@ -268,7 +268,7 @@ The tested anomaly categories include:
 - Abnormal payload
 
 These datasets provide controlled test cases for validating the behavior of the IDS.
-
+![Abnormal Payload Test](images/abnormal_payload_test.png)
 ---
 
 ## IDS Alert Logger
@@ -343,7 +343,7 @@ The IDS successfully identified the two abnormal ADS1115 values while no anomali
 ## Streamlit Dashboard
 
 A Streamlit dashboard was developed to provide an interactive interface for monitoring CAN traffic and IDS alerts.
-
+![CAN Monitoring Dashboard](images/dashboard.png)
 ### Dashboard Features
 
 - CAN communication status
