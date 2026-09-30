@@ -1,1531 +1,467 @@
-Absolutely. Here is the final, properly formatted, GitHub-ready README.md in one single block. Copy the entire block into Notepad and save it as README.md.
-
 # Intelligent CAN-Based Monitoring and Intrusion Detection System
 
-An embedded CAN-based monitoring and intrusion detection system designed to acquire sensor data, transmit it over a Controller Area Network (CAN), analyze the traffic, detect abnormal behavior, and visualize the system status through a real-time dashboard.
+> An end-to-end CAN monitoring and intrusion detection platform for analyzing vehicle-network traffic, monitoring sensor data, detecting abnormal behavior, generating security alerts, and visualizing system activity through an interactive dashboard.
 
 ---
 
 ## Overview
 
-The project combines embedded systems, CAN communication, sensor monitoring, data analysis, and intrusion detection into a single monitoring system.
+Modern vehicles rely heavily on the Controller Area Network (CAN) to exchange information between electronic control units (ECUs). While CAN is efficient and widely deployed, the protocol does not inherently provide mechanisms for authentication or intrusion detection.
 
-An ADS1115 ADC is used for sensor data acquisition. The acquired data is processed by an Arduino Uno and transmitted through an MCP2515 CAN controller and TJA1050 CAN transceiver.
+This project implements an intelligent monitoring and intrusion detection workflow that combines:
 
-The CAN traffic is captured through the Arduino serial interface and processed using Python.
+- CAN communication
+- ADS1115 sensor acquisition
+- Arduino-based embedded hardware
+- MCP2515 CAN controller
+- TJA1050 CAN transceiver
+- Python-based CAN logging and analysis
+- Rule-based anomaly detection
+- Sensor baseline analysis
+- Structured IDS alert generation
+- Streamlit-based visualization
 
-The software system performs:
-
-- CAN traffic logging
-- CAN frame analysis
-- Normal traffic baseline generation
-- Sensor baseline generation
-- CAN anomaly detection
-- Sensor anomaly detection
-- Packet sequence monitoring
-- CAN ID monitoring
-- DLC and payload validation
-- Traffic-rate monitoring
-- IDS alert generation
-- Real-time visualization through Streamlit
+The system establishes a normal operating baseline and compares incoming CAN frames and sensor values against that baseline to identify abnormal behavior.
 
 ---
 
 ## System Architecture
 
 ```text
-                 ┌─────────────────┐
-                 │     ADS1115     │
-                 │   ADC / Sensor  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   Arduino Uno   │
-                 │ Sensor + CAN    │
-                 │ Data Processing │
-                 └────────┬────────┘
-                          │ SPI
-                          ▼
-                 ┌─────────────────┐
-                 │    MCP2515      │
-                 │ CAN Controller  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     TJA1050     │
-                 │ CAN Transceiver │
-                 └────────┬────────┘
-                          │
-                       CAN Bus
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   USB Serial    │
-                 │    Interface    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     Python      │
-                 │ Data Processing │
-                 │      + IDS      │
-                 └────────┬────────┘
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-      ┌─────────────────┐     ┌─────────────────┐
-      │   IDS Alerts    │     │   Streamlit     │
-      │   & Analysis    │     │   Dashboard     │
-      └─────────────────┘     └─────────────────┘
-Hardware Used
-Arduino Uno
-ADS1115 16-bit ADC
-MCP2515 CAN Controller
-TJA1050 CAN Transceiver
-Push Button
-CAN-compatible wiring
-USB connection for serial communication
-Software Used
-Arduino IDE
-Python
-Pandas
-NumPy
-Matplotlib
-Streamlit
-JSON
-CSV
-Git
-GitHub
-CAN Data Protocol
-
-The system uses an 8-byte CAN payload.
-
-Byte(s)	Parameter	Description
-Byte 0	Button State	00 = Released, 01 = Pressed
-Bytes 1–2	ADC Value	16-bit ADS1115 ADC value
-Bytes 3–4	Packet Counter	16-bit sequential frame counter
-Bytes 5–7	Event Time	24-bit event time in milliseconds
-CAN Configuration
-CAN ID : 0x101
-DLC    : 8
-Example CAN Payload
-00 0B 5A 00 29 00 A1 90
-
-Decoded:
-
-Button State : Released
-ADC Value    : 2906
-Packet Count : 41
-Event Time   : 41360 ms
-CAN Logging
-
-The Arduino CAN data is captured through the serial interface and stored in a CSV dataset.
-
-The logged dataset contains:
-
-PC Timestamp
-Event Time (ms)
-CAN ID
-DLC
-CAN Data
-Button State
-ADC Value
-Packet Counter
-
-The final dataset contains:
-
-Total Frames : 51
-CAN ID       : 0x101
-DLC          : 8
-Packet Count : 1–51
-Normal CAN Baseline
-
-A normal CAN traffic baseline was generated from the recorded CAN dataset.
-
-The baseline contains expected characteristics such as:
-
-Allowed CAN IDs
-Expected DLC
-Expected data length
-Valid button states
-Packet counter behavior
-Expected timing behavior
-
-This baseline is used by the IDS to identify abnormal CAN traffic.
-
-ADS1115 Sensor Baseline
-
-A sensor baseline was generated using the recorded ADS1115 values.
-
-Normal Sensor Range
-Minimum : 2875
-Maximum : 2920
-Mean    : 2897.59
-Median  : 2896
-
-The baseline also includes statistical information such as:
-
-Q1  : 2887.5
-Q3  : 2908
-IQR : 20.5
-
-The sensor baseline is used by the IDS to detect abnormal sensor readings.
-
-Intrusion Detection System
-
-The unified CAN IDS analyzes every received frame and checks multiple characteristics.
-
-CAN ID Validation
-
-The IDS verifies whether the received CAN ID belongs to the expected set of CAN IDs.
-
-DLC Validation
-
-The system checks whether the CAN frame contains the expected number of data bytes.
-
-Data Length Validation
-
-The actual payload length is checked against the expected CAN data length.
-
-Payload Validation
-
-The payload structure is checked against the defined CAN protocol.
-
-Packet Sequence Monitoring
-
-The packet counter is monitored to identify:
-
-Missing packets
-Unexpected counter jumps
-Duplicate or incorrect sequence values
-Traffic Rate Monitoring
-
-The system monitors frame timing and traffic rate to identify abnormal bursts of CAN traffic.
-
-Sensor Anomaly Detection
-
-The ADS1115 value is compared against the established normal sensor range.
-
-Controlled Anomaly Tests
-
-Several controlled abnormal CAN datasets were generated to test the IDS.
-
-Abnormal CAN ID
-
-An unexpected CAN identifier was introduced:
-
-0x555
-
-This was used to test detection of unexpected CAN identifiers.
-
-Abnormal DLC
-
-A frame with an incorrect data length was generated to test DLC validation.
-
-Abnormal Traffic Rate
-
-A high-rate CAN traffic dataset was generated to test traffic-rate monitoring.
-
-Abnormal Packet Sequence
-
-A missing packet counter was introduced:
-
-1, 2, 3, 5, 6, 7, 8
-
-This was used to test packet sequence anomaly detection.
-
-Abnormal Payload
-
-An invalid payload value was introduced to test payload validation.
-
-IDS Alert Logger
-
-The alert logger processes the CAN dataset and generates a structured alert file.
-
-The generated alert dataset contains:
-
-Alert Timestamp
-Session
-Severity
-Frame Number
-CAN ID
-DLC
-Data Length
-CAN Data
-Anomaly Type
-Expected Value
-Actual Value
-Description
-Packet Counter
-Event Time (ms)
-ADC Value
-Alert Status
-Dataset Results
-
-The final 51-frame dataset was analyzed by the unified IDS.
-
-Total Frames Analyzed : 51
-Total Anomalous Frames: 2
-
-CAN ID Anomalies      : 0
-DLC Anomalies         : 0
-Data Length Anomalies : 0
-Payload Anomalies     : 0
-Sequence Anomalies    : 0
-Rate Anomalies        : 0
-Sensor Anomalies      : 2
-
-The two detected sensor anomalies were:
-
-Frame 40 → ADC = 2843
-Frame 41 → ADC = 8126
-
-Expected normal sensor range:
-
-2875 – 2920
-
-The IDS classified both events as sensor anomalies.
-
-Streamlit Dashboard
-
-A Streamlit dashboard was developed to visualize the CAN monitoring and IDS results.
-
-The dashboard provides:
-
-CAN system status
-Frame reception progress
-Total IDS alerts
-Alert severity
-Button state statistics
-CAN ID information
-DLC information
-Packet counter monitoring
-ADS1115 sensor monitoring
-Sensor normal range
-Minimum and maximum ADC values
-Sensor anomaly visualization
-CAN traffic visualization
-Event interval analysis
-CAN ID distribution
-
-The final dashboard processes the recorded 51-frame dataset and displays the detected sensor anomalies.
-
-Key Features
-Embedded CAN communication
-ADS1115 sensor acquisition
-MCP2515 CAN controller
-TJA1050 CAN transceiver
-CAN frame logging
-Structured CAN data protocol
-Normal traffic baseline
-Sensor baseline generation
-CAN anomaly detection
-Sensor anomaly detection
-Packet sequence monitoring
-CAN ID validation
-DLC validation
-Payload validation
-Traffic-rate monitoring
-IDS alert generation
-CSV-based datasets
-JSON-based baselines
-Python-based analysis
-Streamlit monitoring dashboard
-Project Outcome
-
-The project demonstrates an end-to-end embedded CAN monitoring and intrusion detection workflow.
-
-Sensor data is acquired at the embedded node, transmitted using CAN, captured through a serial interface, processed using Python, analyzed against established baselines, and presented through a monitoring dashboard.
-
-The system successfully demonstrated detection of abnormal sensor behavior within the recorded CAN dataset while also providing controlled test cases for CAN communication anomalies.
-
-Technologies
-Embedded Systems
-CAN Bus
-Arduino
-ADS1115
-MCP2515
-TJA1050
-Python
-Pandas
-NumPy
-Matplotlib
-Streamlit
-Data Analysis
-Intrusion Detection
-Sensor Monitoring
-Git
-GitHub
-Author
-
-D.V. Sai Vijay Vardhan
-
-B.Tech – Electronics & Communication Engineering
-Mahindra University, Hyderabad
-
-
-### After saving it
-
-Make sure the file is exactly:
-
-```text
-README.md
-
-and located at:
-
-C:\Users\SAI VIJAY VARDHAN\OneDrive\Desktop\Intelligent_CAN_Monitoring_System
-
-Then run:
-
-dir README.md
-
-If it appears correctly, run:
-
-git add README.md
-git status
-
-At that point, we'll verify the complete staged project one last time and make your first commit.
-
-# Intelligent CAN-Based Monitoring and Intrusion Detection System
-
-An embedded CAN-based monitoring and intrusion detection system designed to acquire sensor data, transmit it over a Controller Area Network (CAN), analyze the traffic, detect abnormal behavior, and visualize the system status through a real-time dashboard.
-
----
-
-## Overview
-
-The project combines embedded systems, CAN communication, sensor monitoring, data analysis, and intrusion detection into a single monitoring system.
-
-An ADS1115 ADC is used for sensor data acquisition. The acquired data is processed by an Arduino Uno and transmitted through an MCP2515 CAN controller and TJA1050 CAN transceiver.
-
-The CAN traffic is captured through the Arduino serial interface and processed using Python.
-
-The software system performs:
-
-- CAN traffic logging
-- CAN frame analysis
-- Normal traffic baseline generation
-- Sensor baseline generation
-- CAN anomaly detection
-- Sensor anomaly detection
-- Packet sequence monitoring
-- CAN ID monitoring
-- DLC and payload validation
-- Traffic-rate monitoring
-- IDS alert generation
-- Real-time visualization through Streamlit
-
----
-
-## System Architecture
-
-
-text
-                 ┌─────────────────┐
-                 │     ADS1115     │
-                 │   ADC / Sensor  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   Arduino Uno   │
-                 │ Sensor + CAN    │
-                 │ Data Processing │
-                 └────────┬────────┘
-                          │ SPI
-                          ▼
-                 ┌─────────────────┐
-                 │    MCP2515      │
-                 │ CAN Controller  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     TJA1050     │
-                 │ CAN Transceiver │
-                 └────────┬────────┘
-                          │
-                       CAN Bus
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   USB Serial    │
-                 │    Interface    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     Python      │
-                 │ Data Processing │
-                 │      + IDS      │
-                 └────────┬────────┘
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-      ┌─────────────────┐     ┌─────────────────┐
-      │   IDS Alerts    │     │   Streamlit     │
-      │   & Analysis    │     │   Dashboard     │
-      └─────────────────┘     └─────────────────┘
-
-
-
-you are just giveing this part not all so give me all in a single block
-
-Yes — you're right. The previous response was getting cut off because the code block was being rendered separately. Here is the ENTIRE README from beginning to end in ONE single code block.
-
-Copy everything inside this block into Notepad and save it as README.md.
-
-# Intelligent CAN-Based Monitoring and Intrusion Detection System
-
-An embedded CAN-based monitoring and intrusion detection system designed to acquire sensor data, transmit it over a Controller Area Network (CAN), analyze the traffic, detect abnormal behavior, and visualize the system status through a real-time dashboard.
-
----
-
-## Overview
-
-The project combines embedded systems, CAN communication, sensor monitoring, data analysis, and intrusion detection into a single monitoring system.
-
-An ADS1115 ADC is used for sensor data acquisition. The acquired data is processed by an Arduino Uno and transmitted through an MCP2515 CAN controller and TJA1050 CAN transceiver.
-
-The CAN traffic is captured through the Arduino serial interface and processed using Python.
-
-The software system performs:
-
-- CAN traffic logging
-- CAN frame analysis
-- Normal traffic baseline generation
-- Sensor baseline generation
-- CAN anomaly detection
-- Sensor anomaly detection
-- Packet sequence monitoring
-- CAN ID monitoring
-- DLC and payload validation
-- Traffic-rate monitoring
-- IDS alert generation
-- Real-time visualization through Streamlit
-
----
-
-## System Architecture
-
-```text
-                 ┌─────────────────┐
-                 │     ADS1115     │
-                 │   ADC / Sensor  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   Arduino Uno   │
-                 │ Sensor + CAN    │
-                 │ Data Processing │
-                 └────────┬────────┘
-                          │ SPI
-                          ▼
-                 ┌─────────────────┐
-                 │    MCP2515      │
-                 │ CAN Controller  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     TJA1050     │
-                 │ CAN Transceiver │
-                 └────────┬────────┘
-                          │
-                       CAN Bus
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   USB Serial    │
-                 │    Interface    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     Python      │
-                 │ Data Processing │
-                 │      + IDS      │
-                 └────────┬────────┘
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-      ┌─────────────────┐     ┌─────────────────┐
-      │   IDS Alerts    │     │   Streamlit     │
-      │   & Analysis    │     │   Dashboard     │
-      └─────────────────┘     └─────────────────┘
-Hardware Used
-Arduino Uno
-ADS1115 16-bit ADC
-MCP2515 CAN Controller
-TJA1050 CAN Transceiver
-Push Button
-CAN-compatible wiring
-USB connection for serial communication
-Software Used
-Arduino IDE
-Python
-Pandas
-NumPy
-Matplotlib
-Streamlit
-JSON
-CSV
-Git
-GitHub
-CAN Data Protocol
-
-The system uses an 8-byte CAN payload.
-
-Byte(s)	Parameter	Description
-Byte 0	Button State	00 = Released, 01 = Pressed
-Bytes 1–2	ADC Value	16-bit ADS1115 ADC value
-Bytes 3–4	Packet Counter	16-bit sequential frame counter
-Bytes 5–7	Event Time	24-bit event time in milliseconds
-CAN Configuration
-CAN ID : 0x101
-DLC    : 8
-Example CAN Payload
-00 0B 5A 00 29 00 A1 90
-
-Decoded:
-
-Button State : Released
-ADC Value    : 2906
-Packet Count : 41
-Event Time   : 41360 ms
-CAN Logging
-
-The Arduino CAN data is captured through the serial interface and stored in a CSV dataset.
-
-The logged dataset contains:
-
-PC Timestamp
-Event Time (ms)
-CAN ID
-DLC
-CAN Data
-Button State
-ADC Value
-Packet Counter
-
-The final dataset contains:
-
-Total Frames : 51
-CAN ID       : 0x101
-DLC          : 8
-Packet Count : 1–51
-Normal CAN Baseline
-
-A normal CAN traffic baseline was generated from the recorded CAN dataset.
-
-The baseline contains expected characteristics such as:
-
-Allowed CAN IDs
-Expected DLC
-Expected data length
-Valid button states
-Packet counter behavior
-Expected timing behavior
-
-This baseline is used by the IDS to identify abnormal CAN traffic.
-
-ADS1115 Sensor Baseline
-
-A sensor baseline was generated using the recorded ADS1115 values.
-
-Normal Sensor Range
-Minimum : 2875
-Maximum : 2920
-Mean    : 2897.59
-Median  : 2896
-
-The baseline also includes statistical information such as:
-
-Q1  : 2887.5
-Q3  : 2908
-IQR : 20.5
-
-The sensor baseline is used by the IDS to detect abnormal sensor readings.
-
-Intrusion Detection System
-
-The unified CAN IDS analyzes every received frame and checks multiple characteristics.
-
-CAN ID Validation
-
-The IDS verifies whether the received CAN ID belongs to the expected set of CAN IDs.
-
-DLC Validation
-
-The system checks whether the CAN frame contains the expected number of data bytes.
-
-Data Length Validation
-
-The actual payload length is checked against the expected CAN data length.
-
-Payload Validation
-
-The payload structure is checked against the defined CAN protocol.
-
-Packet Sequence Monitoring
-
-The packet counter is monitored to identify:
-
-Missing packets
-Unexpected counter jumps
-Duplicate or incorrect sequence values
-Traffic Rate Monitoring
-
-The system monitors frame timing and traffic rate to identify abnormal bursts of CAN traffic.
-
-Sensor Anomaly Detection
-
-The ADS1115 value is compared against the established normal sensor range.
-
-Controlled Anomaly Tests
-
-Several controlled abnormal CAN datasets were generated to test the IDS.
-
-Abnormal CAN ID
-
-An unexpected CAN identifier was introduced:
-
-0x555
-
-This was used to test detection of unexpected CAN identifiers.
-
-Abnormal DLC
-
-A frame with an incorrect data length was generated to test DLC validation.
-
-Abnormal Traffic Rate
-
-A high-rate CAN traffic dataset was generated to test traffic-rate monitoring.
-
-Abnormal Packet Sequence
-
-A missing packet counter was introduced:
-
-1, 2, 3, 5, 6, 7, 8
-
-This was used to test packet sequence anomaly detection.
-
-Abnormal Payload
-
-An invalid payload value was introduced to test payload validation.
-
-IDS Alert Logger
-
-The alert logger processes the CAN dataset and generates a structured alert file.
-
-The generated alert dataset contains:
-
-Alert Timestamp
-Session
-Severity
-Frame Number
-CAN ID
-DLC
-Data Length
-CAN Data
-Anomaly Type
-Expected Value
-Actual Value
-Description
-Packet Counter
-Event Time (ms)
-ADC Value
-Alert Status
-Dataset Results
-
-The final 51-frame dataset was analyzed by the unified IDS.
-
-Total Frames Analyzed : 51
-Total Anomalous Frames: 2
-
-CAN ID Anomalies      : 0
-DLC Anomalies         : 0
-Data Length Anomalies : 0
-Payload Anomalies     : 0
-Sequence Anomalies    : 0
-Rate Anomalies        : 0
-Sensor Anomalies      : 2
-
-The two detected sensor anomalies were:
-
-Frame 40 → ADC = 2843
-Frame 41 → ADC = 8126
-
-Expected normal sensor range:
-
-2875 – 2920
-
-The IDS classified both events as sensor anomalies.
-
-Streamlit Dashboard
-
-A Streamlit dashboard was developed to visualize the CAN monitoring and IDS results.
-
-The dashboard provides:
-
-CAN system status
-Frame reception progress
-Total IDS alerts
-Alert severity
-Button state statistics
-CAN ID information
-DLC information
-Packet counter monitoring
-ADS1115 sensor monitoring
-Sensor normal range
-Minimum and maximum ADC values
-Sensor anomaly visualization
-CAN traffic visualization
-Event interval analysis
-CAN ID distribution
-
-The final dashboard processes the recorded 51-frame dataset and displays the detected sensor anomalies.
-
-Key Features
-Embedded CAN communication
-ADS1115 sensor acquisition
-MCP2515 CAN controller
-TJA1050 CAN transceiver
-CAN frame logging
-Structured CAN data protocol
-Normal traffic baseline
-Sensor baseline generation
-CAN anomaly detection
-Sensor anomaly detection
-Packet sequence monitoring
-CAN ID validation
-DLC validation
-Payload validation
-Traffic-rate monitoring
-IDS alert generation
-CSV-based datasets
-JSON-based baselines
-Python-based analysis
-Streamlit monitoring dashboard
-Project Outcome
-
-The project demonstrates an end-to-end embedded CAN monitoring and intrusion detection workflow.
-
-Sensor data is acquired at the embedded node, transmitted using CAN, captured through a serial interface, processed using Python, analyzed against established baselines, and presented through a monitoring dashboard.
-
-The system successfully demonstrated detection of abnormal sensor behavior within the recorded CAN dataset while also providing controlled test cases for CAN communication anomalies.
-
-Technologies
-Embedded Systems
-CAN Bus
-Arduino
-ADS1115
-MCP2515
-TJA1050
-Python
-Pandas
-NumPy
-Matplotlib
-Streamlit
-Data Analysis
-Intrusion Detection
-Sensor Monitoring
-Git
-GitHub
-Author
-
-D.V. Sai Vijay Vardhan
-
-B.Tech – Electronics & Communication Engineering
-Mahindra University, Hyderabad
-
-
-### Now save it
-
-In Notepad:
-
-**File → Save As**
-
-Filename:
-
-```text
-README.md
-
-Save as type:
-
-All Files (*.*)
-
-Encoding:
-
-UTF-8
-
-Location:
-
-C:\Users\SAI VIJAY VARDHAN\OneDrive\Desktop\Intelligent_CAN_Monitoring_System
-
-Then run:
-
-dir README.md
-
-If it shows the file, run:
-
-git add README.md
-git status
-
-Then send me the git status output.
-
-again you are giveing me the same now u generate a word file for readme instead a single block so that it will easy to put in notepad
-
-Done. I created the complete README content as a Word file so you can open it easily and copy the entire content into Notepad.
-
-Download the README Word file
-
-Open it → Ctrl+A → Ctrl+C → paste into Notepad → save as:
-
-README.md
-
-Then save it inside:
-
-C:\Users\SAI VIJAY VARDHAN\OneDrive\Desktop\Intelligent_CAN_Monitoring_System
-
-After that, tell me “saved”, and we'll continue with Git. 
-
-CAN_Project_README_Content.docx
-Document
-
-CAN_Project_README_Content
-100%
-
-# Intelligent CAN-Based Monitoring and Intrusion Detection System
-
-An embedded CAN-based monitoring and intrusion detection system designed to acquire sensor data, transmit it over a Controller Area Network (CAN), analyze the traffic, detect abnormal behavior, and visualize the system status through a real-time dashboard.
-
----
-
-## Overview
-
-The project combines embedded systems, CAN communication, sensor monitoring, data analysis, and intrusion detection into a single monitoring system.
-
-An ADS1115 ADC is used for sensor data acquisition. The acquired data is processed by an Arduino Uno and transmitted through an MCP2515 CAN controller and TJA1050 CAN transceiver.
-
-The CAN traffic is captured through the Arduino serial interface and processed using Python.
-
-The software system performs:
-
-- CAN traffic logging
-
-- CAN frame analysis
-
-- Normal traffic baseline generation
-
-- Sensor baseline generation
-
-- CAN anomaly detection
-
-- Sensor anomaly detection
-
-- Packet sequence monitoring
-
-- CAN ID monitoring
-
-- DLC and payload validation
-
-- Traffic-rate monitoring
-
-- IDS alert generation
-
-- Real-time visualization through Streamlit
-
----
-
-## System Architecture
-
-```text
-
-                 ┌─────────────────┐
-
-                 │     ADS1115     │
-
-                 │   ADC / Sensor  │
-
-                 └────────┬────────┘
-
-                          │
-
-                          ▼
-
-                 ┌─────────────────┐
-
-                 │   Arduino Uno   │
-
-                 │ Sensor + CAN    │
-
-                 │ Data Processing │
-
-                 └────────┬────────┘
-
-                          │ SPI
-
-                          ▼
-
-                 ┌─────────────────┐
-
-                 │    MCP2515      │
-
-                 │ CAN Controller  │
-
-                 └────────┬────────┘
-
-                          │
-
-                          ▼
-
-                 ┌─────────────────┐
-
-                 │     TJA1050     │
-
-                 │ CAN Transceiver │
-
-                 └────────┬────────┘
-
-                          │
-
-                       CAN Bus
-
-                          │
-
-                          ▼
-
-                 ┌─────────────────┐
-
-                 │   USB Serial    │
-
-                 │    Interface    │
-
-                 └────────┬────────┘
-
-                          │
-
-                          ▼
-
-                 ┌─────────────────┐
-
-                 │     Python      │
-
-                 │ Data Processing │
-
-                 │      + IDS      │
-
-                 └────────┬────────┘
-
-                          │
-
-              ┌───────────┴───────────┐
-
-              ▼                       ▼
-
-      ┌─────────────────┐     ┌─────────────────┐
-
-      │   IDS Alerts    │     │   Streamlit     │
-
-      │   & Analysis    │     │   Dashboard     │
-
-      └─────────────────┘     └─────────────────┘
-
+                     ┌───────────────┐
+                     │    ADS1115    │
+                     │  Sensor / ADC │
+                     └───────┬───────┘
+                             │ I²C
+                             ▼
+                     ┌───────────────┐
+                     │  Arduino Uno  │
+                     └───────┬───────┘
+                             │ SPI
+                             ▼
+                     ┌───────────────┐
+                     │    MCP2515    │
+                     │ CAN Controller│
+                     └───────┬───────┘
+                             │
+                             ▼
+                     ┌───────────────┐
+                     │    TJA1050    │
+                     │ CAN Transceiver│
+                     └───────┬───────┘
+                             │
+                             ▼
+                         CAN Bus
+                             │
+                             ▼
+                       USB Serial
+                             │
+                             ▼
+                     ┌───────────────┐
+                     │    Python     │
+                     │ Logger + IDS  │
+                     └───────┬───────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+          CAN Logging    Anomaly IDS    Data Analysis
+              │              │              │
+              └──────────────┼──────────────┘
+                             ▼
+                     ┌───────────────┐
+                     │   Streamlit   │
+                     │   Dashboard   │
+                     └───────────────┘
 ```
 
 ---
 
 ## Hardware Used
 
-- Arduino Uno
-
-- ADS1115 16-bit ADC
-
-- MCP2515 CAN Controller
-
-- TJA1050 CAN Transceiver
-
-- Push Button
-
-- CAN-compatible wiring
-
-- USB connection for serial communication
+| Component | Purpose |
+|---|---|
+| Arduino Uno | Embedded CAN node and sensor interface |
+| ADS1115 | 16-bit ADC for sensor data acquisition |
+| MCP2515 | CAN controller |
+| TJA1050 | CAN physical-layer transceiver |
+| Push Button | Digital event input |
+| CAN Bus Interface | CAN communication |
+| USB Cable | Arduino-to-PC serial communication |
 
 ---
 
-## Software Used
+## Software & Technologies
+
+### Programming
+
+- C/C++ — Arduino firmware
+- Python — logging, analysis, IDS, dashboard
+
+### Python Libraries
+
+- `python-can`
+- `pandas`
+- `numpy`
+- `matplotlib`
+- `streamlit`
+
+### Communication
+
+- CAN
+- SPI
+- I²C
+- USB Serial
+
+### Development & Version Control
 
 - Arduino IDE
-
-- Python
-
-- Pandas
-
-- NumPy
-
-- Matplotlib
-
-- Streamlit
-
-- JSON
-
-- CSV
-
 - Git
-
 - GitHub
 
 ---
 
 ## CAN Data Protocol
 
-The system uses an 8-byte CAN payload.
+The system uses CAN ID `0x101` with an 8-byte data payload.
 
-| Byte(s) | Parameter | Description |
-
-|---------|-----------|-------------|
-
+| Byte | Field | Description |
+|---|---|---|
 | Byte 0 | Button State | `00` = Released, `01` = Pressed |
-
-| Bytes 1–2 | ADC Value | 16-bit ADS1115 ADC value |
-
+| Bytes 1–2 | ADC Value | 16-bit ADS1115 reading |
 | Bytes 3–4 | Packet Counter | 16-bit sequential frame counter |
+| Bytes 5–7 | Event Time | 24-bit event timestamp in milliseconds |
 
-| Bytes 5–7 | Event Time | 24-bit event time in milliseconds |
-
-### CAN Configuration
+### Payload Structure
 
 ```text
-
-CAN ID : 0x101
-
-DLC    : 8
-
+Byte 0       → Button State
+Bytes 1–2    → ADS1115 ADC Value
+Bytes 3–4    → Packet Counter
+Bytes 5–7    → Event Time
 ```
 
 ### Example CAN Payload
 
 ```text
-
 00 0B 5A 00 29 00 A1 90
-
 ```
 
 Decoded:
 
 ```text
-
-Button State : Released
-
-ADC Value    : 2906
-
-Packet Count : 41
-
-Event Time   : 41360 ms
-
+Button State  = 0
+ADC Value     = 2906
+Packet Counter = 41
+Event Time    = 41360 ms
 ```
 
 ---
 
-## CAN Logging
+## CAN Data Logging
 
-The Arduino CAN data is captured through the serial interface and stored in a CSV dataset.
+CAN communication is captured through the Arduino and transferred to Python through USB serial communication.
 
-The logged dataset contains:
+The logger records:
 
-- PC Timestamp
-
-- Event Time (ms)
-
+- PC timestamp
+- Event time
 - CAN ID
-
 - DLC
+- CAN data
+- Button state
+- ADC value
+- Packet counter
 
-- CAN Data
-
-- Button State
-
-- ADC Value
-
-- Packet Counter
-
-The final dataset contains:
-
-```text
-
-Total Frames : 51
-
-CAN ID       : 0x101
-
-DLC          : 8
-
-Packet Count : 1–51
-
-```
+The collected data is stored in CSV format and forms the basis for subsequent traffic analysis and anomaly detection.
 
 ---
 
 ## Normal CAN Baseline
 
-A normal CAN traffic baseline was generated from the recorded CAN dataset.
+A normal CAN traffic baseline is created from the recorded dataset.
 
-The baseline contains expected characteristics such as:
+The baseline defines expected communication characteristics, including:
 
-- Allowed CAN IDs
-
-- Expected DLC
-
+- Expected CAN ID
+- Allowed DLC
 - Expected data length
-
 - Valid button states
+- Packet counter progression
+- Event timing
 
-- Packet counter behavior
+For the recorded normal dataset:
 
-- Expected timing behavior
-
-This baseline is used by the IDS to identify abnormal CAN traffic.
+```text
+Expected CAN ID      : 0x101
+Expected DLC         : 8
+Expected Data Length: 8
+Expected Packet Step : 1
+CAN Sessions         : 1
+```
 
 ---
 
 ## ADS1115 Sensor Baseline
 
-A sensor baseline was generated using the recorded ADS1115 values.
+The ADS1115 readings were analyzed to establish a normal sensor operating range.
 
-### Normal Sensor Range
+### Baseline Statistics
+
+| Parameter | Value |
+|---|---:|
+| Total frames | 51 |
+| Minimum | 2843 |
+| Maximum | 8126 |
+| Median | 2896 |
+| Q1 | 2887.50 |
+| Q3 | 2908.00 |
+| IQR | 20.50 |
+| Normal minimum | 2875 |
+| Normal maximum | 2920 |
+| Mean of normal range data | 2897.59 |
+
+Two possible outliers were identified during baseline analysis:
 
 ```text
-
-Minimum : 2875
-
-Maximum : 2920
-
-Mean    : 2897.59
-
-Median  : 2896
-
+Frame 40 → ADC = 2843
+Frame 41 → ADC = 8126
 ```
 
-The baseline also includes statistical information such as:
+The IDS uses the established normal range of:
 
 ```text
-
-Q1  : 2887.5
-
-Q3  : 2908
-
-IQR : 20.5
-
+2875 – 2920
 ```
-
-The sensor baseline is used by the IDS to detect abnormal sensor readings.
 
 ---
 
 ## Intrusion Detection System
 
-The unified CAN IDS analyzes every received frame and checks multiple characteristics.
+The unified CAN IDS evaluates each received frame against the established CAN and sensor baselines.
 
-### CAN ID Validation
+### Detection Checks
 
-The IDS verifies whether the received CAN ID belongs to the expected set of CAN IDs.
+| Detection | Description |
+|---|---|
+| CAN ID anomaly | Detects unexpected CAN identifiers |
+| DLC anomaly | Detects unexpected CAN data length codes |
+| Data length anomaly | Checks actual payload length |
+| Payload anomaly | Detects invalid or unexpected payload values |
+| Sequence anomaly | Detects missing or unexpected packet counters |
+| Rate anomaly | Detects abnormal traffic frequency |
+| Sensor anomaly | Detects ADS1115 values outside the normal range |
 
-### DLC Validation
-
-The system checks whether the CAN frame contains the expected number of data bytes.
-
-### Data Length Validation
-
-The actual payload length is checked against the expected CAN data length.
-
-### Payload Validation
-
-The payload structure is checked against the defined CAN protocol.
-
-### Packet Sequence Monitoring
-
-The packet counter is monitored to identify:
-
-- Missing packets
-
-- Unexpected counter jumps
-
-- Duplicate or incorrect sequence values
-
-### Traffic Rate Monitoring
-
-The system monitors frame timing and traffic rate to identify abnormal bursts of CAN traffic.
-
-### Sensor Anomaly Detection
-
-The ADS1115 value is compared against the established normal sensor range.
+The IDS also tracks CAN sessions by monitoring event-time progression.
 
 ---
 
 ## Controlled Anomaly Tests
 
-Several controlled abnormal CAN datasets were generated to test the IDS.
+Controlled abnormal datasets were generated to evaluate individual IDS detection mechanisms.
 
-### Abnormal CAN ID
+The tested anomaly categories include:
 
-An unexpected CAN identifier was introduced:
+- Abnormal CAN ID
+- Abnormal DLC
+- Abnormal traffic rate
+- Packet sequence anomaly
+- Abnormal payload
 
-```text
-
-0x555
-
-```
-
-This was used to test detection of unexpected CAN identifiers.
-
-### Abnormal DLC
-
-A frame with an incorrect data length was generated to test DLC validation.
-
-### Abnormal Traffic Rate
-
-A high-rate CAN traffic dataset was generated to test traffic-rate monitoring.
-
-### Abnormal Packet Sequence
-
-A missing packet counter was introduced:
-
-```text
-
-1, 2, 3, 5, 6, 7, 8
-
-```
-
-This was used to test packet sequence anomaly detection.
-
-### Abnormal Payload
-
-An invalid payload value was introduced to test payload validation.
+These datasets provide controlled test cases for validating the behavior of the IDS.
 
 ---
 
 ## IDS Alert Logger
 
-The alert logger processes the CAN dataset and generates a structured alert file.
+The IDS Alert Logger converts detected anomalies into structured security alerts.
 
-The generated alert dataset contains:
+Each alert contains information such as:
 
-- Alert Timestamp
-
+- Alert timestamp
 - Session
-
 - Severity
-
-- Frame Number
-
+- Frame number
 - CAN ID
-
 - DLC
-
-- Data Length
-
-- CAN Data
-
-- Anomaly Type
-
-- Expected Value
-
-- Actual Value
-
+- Data length
+- CAN data
+- Anomaly type
+- Expected value
+- Actual value
 - Description
+- Packet counter
+- Event time
+- ADC value
+- Alert status
 
-- Packet Counter
-
-- Event Time (ms)
-
-- ADC Value
-
-- Alert Status
+Sensor anomalies are assigned **MEDIUM** severity in the current implementation.
 
 ---
 
 ## Dataset Results
 
-The final 51-frame dataset was analyzed by the unified IDS.
+The final recorded CAN dataset contains:
 
 ```text
-
-Total Frames Analyzed : 51
-
-Total Anomalous Frames: 2
-
-CAN ID Anomalies      : 0
-
-DLC Anomalies         : 0
-
-Data Length Anomalies : 0
-
-Payload Anomalies     : 0
-
-Sequence Anomalies    : 0
-
-Rate Anomalies        : 0
-
-Sensor Anomalies      : 2
-
+Total frames       : 51
+CAN ID             : 0x101
+DLC                : 8
+Packet counters    : 1–51
+CAN sessions       : 1
+Total anomalies    : 2
 ```
 
-The two detected sensor anomalies were:
+### Detected Anomalies
+
+| Frame | Anomaly | Expected | Actual |
+|---:|---|---|---:|
+| 40 | Abnormal ADS1115 value | 2875–2920 | 2843 |
+| 41 | Abnormal ADS1115 value | 2875–2920 | 8126 |
+
+### Unified IDS Summary
 
 ```text
-
-Frame 40 → ADC = 2843
-
-Frame 41 → ADC = 8126
-
+CAN ID anomalies       : 0
+DLC anomalies          : 0
+Data length anomalies  : 0
+Payload anomalies      : 0
+Sequence anomalies     : 0
+Rate anomalies         : 0
+Sensor anomalies       : 2
 ```
 
-Expected normal sensor range:
+### Result
 
 ```text
-
-2875 – 2920
-
+CAN/SENSOR ANOMALIES DETECTED
 ```
 
-The IDS classified both events as sensor anomalies.
+The IDS successfully identified the two abnormal ADS1115 values while no anomalies were detected in CAN ID, DLC, data length, payload, packet sequence, or traffic rate for the final dataset.
 
 ---
 
 ## Streamlit Dashboard
 
-A Streamlit dashboard was developed to visualize the CAN monitoring and IDS results.
+A Streamlit dashboard was developed to provide an interactive interface for monitoring CAN traffic and IDS alerts.
 
-The dashboard provides:
+### Dashboard Features
 
-- CAN system status
-
-- Frame reception progress
-
-- Total IDS alerts
-
-- Alert severity
-
+- CAN communication status
+- Frame count
+- Total alert count
+- High and medium severity alerts
 - Button state statistics
-
 - CAN ID information
-
 - DLC information
-
 - Packet counter monitoring
-
 - ADS1115 sensor monitoring
-
-- Sensor normal range
-
-- Minimum and maximum ADC values
-
-- Sensor anomaly visualization
-
-- CAN traffic visualization
-
-- Event interval analysis
-
+- Normal sensor range
+- ADC trend visualization
+- IDS alert table
+- CAN event interval visualization
 - CAN ID distribution
+- CAN traffic replay
 
-The final dashboard processes the recorded 51-frame dataset and displays the detected sensor anomalies.
+### Final Dataset Dashboard
+
+The final dashboard displays:
+
+```text
+CAN Frames        : 51 / 51
+Total Alerts      : 2
+High Alerts       : 0
+Medium Alerts     : 2
+Pressed Frames    : 9
+Released Frames   : 42
+CAN ID            : 0x101
+DLC               : 8
+Packet Counter    : 1 → 51
+ADC Normal Range  : 2875 – 2920
+ADC Minimum       : 2843
+ADC Maximum       : 8126
+```
 
 ---
 
 ## Key Features
 
-- Embedded CAN communication
-
+- Real-time CAN monitoring
+- CAN data logging
 - ADS1115 sensor acquisition
-
-- MCP2515 CAN controller
-
-- TJA1050 CAN transceiver
-
-- CAN frame logging
-
-- Structured CAN data protocol
-
-- Normal traffic baseline
-
-- Sensor baseline generation
-
-- CAN anomaly detection
-
-- Sensor anomaly detection
-
+- CAN traffic baseline creation
+- Sensor baseline creation
+- CAN ID anomaly detection
+- DLC anomaly detection
+- Payload anomaly detection
 - Packet sequence monitoring
-
-- CAN ID validation
-
-- DLC validation
-
-- Payload validation
-
 - Traffic-rate monitoring
+- Sensor anomaly detection
+- Controlled anomaly generation
+- Structured IDS alert generation
+- CAN traffic visualization
+- Interactive Streamlit dashboard
+- Git-based version control
+- GitHub project management
 
-- IDS alert generation
+---
 
-- CSV-based datasets
+## Project Workflow
 
-- JSON-based baselines
-
-- Python-based analysis
-
-- Streamlit monitoring dashboard
+```text
+CAN Data Acquisition
+        ↓
+CAN Data Logging
+        ↓
+Normal Baseline Creation
+        ↓
+Sensor Baseline Creation
+        ↓
+CAN Traffic Analysis
+        ↓
+Anomaly Detection
+        ↓
+IDS Alert Generation
+        ↓
+Dashboard Visualization
+```
 
 ---
 
 ## Project Outcome
 
-The project demonstrates an end-to-end embedded CAN monitoring and intrusion detection workflow.
+This project demonstrates an end-to-end CAN monitoring and intrusion detection workflow combining embedded systems, automotive communication, sensor monitoring, data analysis, and cybersecurity concepts.
 
-Sensor data is acquired at the embedded node, transmitted using CAN, captured through a serial interface, processed using Python, analyzed against established baselines, and presented through a monitoring dashboard.
+The final system analyzed a **51-frame CAN dataset** and successfully detected **2 abnormal ADS1115 sensor values**.
 
-The system successfully demonstrated detection of abnormal sensor behavior within the recorded CAN dataset while also providing controlled test cases for CAN communication anomalies.
+The project demonstrates how baseline-based monitoring can be used to identify abnormal behavior in a CAN communication environment.
 
 ---
 
 ## Technologies
 
-```text
+**Embedded Systems**
 
-Embedded Systems
+Arduino Uno • ADS1115 • MCP2515 • TJA1050
 
-CAN Bus
+**Communication**
 
-Arduino
+CAN • SPI • I²C • USB Serial
 
-ADS1115
+**Programming**
 
-MCP2515
+C/C++ • Python
 
-TJA1050
+**Data Analysis**
 
-Python
+Pandas • NumPy • Matplotlib
 
-Pandas
-
-NumPy
-
-Matplotlib
+**Monitoring**
 
 Streamlit
 
-Data Analysis
+**Version Control**
 
-Intrusion Detection
-
-Sensor Monitoring
-
-Git
-
-GitHub
-
-```
+Git • GitHub
 
 ---
 
@@ -1533,6 +469,7 @@ GitHub
 
 **D.V. Sai Vijay Vardhan**
 
-B.Tech – Electronics & Communication Engineering
-
+B.Tech Electronics & Communication Engineering  
 Mahindra University, Hyderabad
+
+---
