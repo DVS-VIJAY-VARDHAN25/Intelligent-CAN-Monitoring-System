@@ -87,9 +87,9 @@ The system establishes a normal operating baseline and compares incoming CAN fra
 | Push Button | Digital event input |
 | CAN Bus Interface | CAN communication |
 | USB Cable | Arduino-to-PC serial communication |
-![Hardware Setup](images/hardware_setup.jpg)
----
 
+---
+![Hardware Setup](images/hardware_setup.jpg)
 ## Software & Technologies
 
 ### Programming
@@ -130,6 +130,7 @@ The system uses CAN ID `0x101` with an 8-byte data payload.
 | Bytes 1–2 | ADC Value | 16-bit ADS1115 reading |
 | Bytes 3–4 | Packet Counter | 16-bit sequential frame counter |
 | Bytes 5–7 | Event Time | 24-bit event timestamp in milliseconds |
+---
 ![CAN Frame Output](images/can_frame_output.png)
 ### Payload Structure
 
