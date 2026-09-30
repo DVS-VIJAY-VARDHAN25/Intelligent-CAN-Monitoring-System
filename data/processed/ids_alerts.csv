@@ -1,0 +1,6 @@
+Alert Timestamp,Session,Severity,Frame Number,CAN ID,DLC,Data Length,CAN Data,Anomaly Type,Expected Value,Actual Value,Description,Packet Counter,Event Time (ms),ADC Value,Alert Status
+2026-09-29 22:49:24,1,MEDIUM,2,0X101,8,8,00 0B 39 00 02 00 04 24,ABNORMAL ADS1115 VALUE,2875-2920,2873,ADS1115 sensor value is outside the learned normal operating range.,2,1060,2873,OPEN
+2026-09-29 22:49:24,1,MEDIUM,5,0X101,8,8,00 0B 2E 00 05 00 10 40,ABNORMAL ADS1115 VALUE,2875-2920,2862,ADS1115 sensor value is outside the learned normal operating range.,5,4160,2862,OPEN
+2026-09-29 22:49:24,1,MEDIUM,7,0X101,8,8,01 0B 32 00 07 00 18 52,ABNORMAL ADS1115 VALUE,2875-2920,2866,ADS1115 sensor value is outside the learned normal operating range.,7,6226,2866,OPEN
+2026-09-29 22:49:24,1,MEDIUM,10,0X101,8,8,01 0B 3A 00 0A 00 24 6E,ABNORMAL ADS1115 VALUE,2875-2920,2874,ADS1115 sensor value is outside the learned normal operating range.,10,9326,2874,OPEN
+2026-09-29 22:49:24,1,MEDIUM,12,0X101,8,8,00 0B 32 00 0C 00 2C 81,ABNORMAL ADS1115 VALUE,2875-2920,2866,ADS1115 sensor value is outside the learned normal operating range.,12,11393,2866,OPEN

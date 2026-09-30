@@ -1,0 +1,36 @@
+{
+    "report_information": {
+        "report_version": "1.0",
+        "generated_at": "2026-09-28T23:54:23.252338",
+        "source_file": "can_log.csv",
+        "baseline_file": "data/processed/normal_baseline.json"
+    },
+    "analysis_summary": {
+        "total_frames": 10,
+        "total_anomalous_frames": 1,
+        "anomaly_percentage": 10.0,
+        "result": "ANOMALIES DETECTED"
+    },
+    "anomaly_breakdown": {
+        "can_id_anomalies": 0,
+        "dlc_anomalies": 0,
+        "data_length_anomalies": 0,
+        "payload_anomalies": 0,
+        "sequence_anomalies": 1,
+        "rate_anomalies": 0
+    },
+    "anomalous_frames": [
+        {
+            "frame_number": 3,
+            "can_id": "0x101",
+            "dlc": 8,
+            "can_data": "01 00 00 00 01 00 0B 84",
+            "button_state": "PRESSED",
+            "packet_counter": 1,
+            "event_time_ms": 2948,
+            "reasons": [
+                "PACKET SEQUENCE ERROR (expected 3, received 1)"
+            ]
+        }
+    ]
+}

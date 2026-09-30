@@ -1,0 +1,20 @@
+{
+    "baseline_name": "ADS1115 Sensor Normal Baseline",
+    "version": "1.0",
+    "source_dataset": "can_log.csv",
+    "total_frames": 51,
+    "adc_sensor": {
+        "sensor": "ADS1115",
+        "channel": "A0",
+        "normal_min": 2875.0,
+        "normal_max": 2920.0,
+        "mean": 2897.591836734694,
+        "median": 2896.0,
+        "q1": 2887.5,
+        "q3": 2908.0,
+        "iqr": 20.5,
+        "iqr_lower_limit": 2856.75,
+        "iqr_upper_limit": 2938.75,
+        "outliers_detected_during_baseline": 2
+    }
+}

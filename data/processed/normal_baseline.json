@@ -1,0 +1,28 @@
+{
+    "baseline_name": "Normal CAN Traffic Baseline",
+    "version": "1.0",
+    "source_dataset": "can_log.csv",
+    "total_frames": 10,
+    "can_ids": [
+        "0x101"
+    ],
+    "allowed_dlc": [
+        8
+    ],
+    "allowed_data_lengths": [
+        8
+    ],
+    "allowed_button_states": [
+        "PRESSED",
+        "RELEASED"
+    ],
+    "timing": {
+        "average_interval_ms": 2433.25,
+        "minimum_interval_ms": 146.0,
+        "maximum_interval_ms": 5026.0,
+        "average_event_rate_per_second": 0.411
+    },
+    "packet_counter": {
+        "expected_increment": 1
+    }
+}
